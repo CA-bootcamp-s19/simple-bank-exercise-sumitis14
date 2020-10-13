@@ -61,8 +61,7 @@ contract SimpleBank {
     // allows function to run locally/off blockchain
     function getBalance() public view returns (uint) {
         /* Get the balance of the sender of this transaction */
-        address user = msg.sender;
-        return balances[user];
+        return balances[msg.sender];
     }
 
     /// @notice Enroll a customer with the bank
@@ -85,6 +84,7 @@ contract SimpleBank {
         /* Add the amount to the user's balance, call the event associated with a deposit,
           then return the balance of the user */
           address user = msg.sender;
+          require(enrolled[user] == true, 'User must be enrolled to withdraw');
           balances[user] += msg.value;
           emit LogDepositMade(user, msg.value);
           return balances[user];
@@ -101,9 +101,11 @@ contract SimpleBank {
            to the user attempting to withdraw. 
            return the user's balance.*/
            address user = msg.sender;
-           require(balances[user] >= withdrawAmount);
+           require(enrolled[user] == true, 'User must be enrolled to withdraw');
+           require(balances[user] >= withdrawAmount, 'Not enough funds to withdraw!');
            balances[user] -= withdrawAmount;
            emit LogWithdrawal(user, withdrawAmount, balances[user]);
+           return balances[user];
     }
 
 }
